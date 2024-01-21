@@ -44,6 +44,20 @@ impl Default for Person {
 
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        
+        if s.len() == 0 {
+            return Person::default();
+        }
+        let v: Vec<&str> = s.split(",").collect();
+        if v[0] == "" || v.len() < 2 || v[1] == "" {
+            return Person::default();
+        }
+        let name = String::from(v[0]);
+        if let Ok(age) = v[1].parse() {
+            Person {name, age}            
+        } else {
+            Person::default()
+        }
     }
 }
 
