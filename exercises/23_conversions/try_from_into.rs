@@ -9,7 +9,7 @@
 // Execute `rustlings hint try_from_into` or use the `hint` watch subcommand for
 // a hint.
 
-use std::convert::{TryFrom, TryInto};
+use std::{convert::{TryFrom, TryInto}, num::TryFromIntError};
 
 #[derive(Debug, PartialEq)]
 struct Color {
@@ -27,6 +27,12 @@ enum IntoColorError {
     IntConversion,
 }
 
+impl From<TryFromIntError> for IntoColorError {
+    fn from(value: TryFromIntError) -> Self {
+        IntoColorError::IntConversion
+    }
+}
+
 // I AM NOT DONE
 
 // Your task is to complete this implementation and return an Ok result of inner
@@ -41,6 +47,10 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let r = u8::try_from(tuple.0)?;
+        let g = u8::try_from(tuple.1)?;
+        let b = u8::try_from(tuple.2)?;
+        Ok(Color {red: r, green: g, blue: b})
     }
 }
 
@@ -48,6 +58,7 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        let v = arr.into_iter().map(|v| u8::try_from(v)?).collect();
     }
 }
 
