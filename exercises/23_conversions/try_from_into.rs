@@ -9,7 +9,10 @@
 // Execute `rustlings hint try_from_into` or use the `hint` watch subcommand for
 // a hint.
 
-use std::{convert::{TryFrom, TryInto}, num::TryFromIntError};
+use std::{
+    convert::{TryFrom, TryInto},
+    num::TryFromIntError,
+};
 
 #[derive(Debug, PartialEq)]
 struct Color {
@@ -50,7 +53,11 @@ impl TryFrom<(i16, i16, i16)> for Color {
         let r = u8::try_from(tuple.0)?;
         let g = u8::try_from(tuple.1)?;
         let b = u8::try_from(tuple.2)?;
-        Ok(Color {red: r, green: g, blue: b})
+        Ok(Color {
+            red: r,
+            green: g,
+            blue: b,
+        })
     }
 }
 
@@ -58,7 +65,13 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
-        let v = arr.into_iter().map(|v| u8::try_from(v)?).collect();
+        let f = |x: i16| u8::try_from(x);
+        let vs = arr.into_iter().map(f).collect::<Result<Vec<_>, _>>()?;
+        Ok(Color {
+            red: vs[0],
+            green: vs[1],
+            blue: vs[2],
+        })
     }
 }
 
@@ -66,6 +79,29 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+        let f = |x: &i16| u8::try_from(*x);
+        // let [r, g, b] = slice.iter().map(f).collect::<Result<Vec<_>, _>>()?;
+        //     [a, b, c] => (a,b,c),
+        //     _ => unreachable!(),
+        // };
+        // let red
+        // Ok(Color {red: vs[0], green: vs[1], blue: vs[2]})
+        let &[r, g, b] = slice
+            .iter()
+            .map(f)
+            .collect::<Result<Vec<_>, _>>()?
+            .as_slice()
+        else {
+            unreachable!()
+        };
+        Ok(Color {
+            red: r,
+            green: g,
+            blue: b,
+        })
     }
 }
 
